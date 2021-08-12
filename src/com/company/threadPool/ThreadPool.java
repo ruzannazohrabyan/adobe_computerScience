@@ -21,9 +21,9 @@ public class ThreadPool {
 
     private void init() {
         for (int i = 0; i < MAX_SEMAPHORE; i++) {
-            threads.add(new Thread(new threadRunnable()));
+            threads.add(new Thread(new ThreadRunnable()));
         }
-        for(Thread thread : threads) {
+        for (Thread thread : threads) {
             System.out.println(thread.getName() + " started");
             thread.start();
         }
@@ -34,35 +34,34 @@ public class ThreadPool {
             producerSemaphore.acquire();
             mutex.acquire();
             functions.add(data);
+            mutex.release();
+            consumerSemaphore.acquire();
+            producerSemaphore.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            mutex.release();
-            producerSemaphore.release();
         }
     }
 
 
-    private class threadRunnable implements Runnable {
-//        Integer i;
+    private class ThreadRunnable implements Runnable {
 
         @Override
         public void run() {
             while (true) {
                 try {
-                    consumerSemaphore.acquire();
+
                     mutex.acquire();
                     Integer i = (functions.poll());
                     mutex.release();
-                    System.out.println(consumerSemaphore.toString() + " -- " + i);
+                    System.out.println( " -- " + i);
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                } finally {
+                }finally {
                     consumerSemaphore.release();
                 }
             }
         }
     }
 }
-
